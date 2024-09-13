@@ -1,8 +1,10 @@
 INFO:__main__:Files loaded successfully
 INFO:py4j.java_gateway:Callback Server Starting
-INFO:py4j.java_gateway:Socket listening on ('127.0.0.1', 45051)
+INFO:py4j.java_gateway:Socket listening on ('127.0.0.1', 36189)
 INFO:py4j.clientserver:Python Server ready to receive messages
 INFO:py4j.clientserver:Received command c on object id p0
 INFO:__main__:Data transformed
 INFO:__main__:File saved successfully
+INFO:__main__:Data quality check passed - 48718 rows
+INFO:__main__:There are NO null values in critical columns
 INFO:py4j.clientserver:Closing down clientserver connection

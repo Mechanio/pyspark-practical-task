@@ -52,7 +52,6 @@ def save_data(df):
     df.write.mode("append").partitionBy("neighbourhood_group").parquet("processed/")
     logger.info("File saved successfully")
 
-
 def log_processed_file(file):
     with open(processed_files, 'a') as log_file:
         log_file.write(f"{file}\n")
@@ -61,6 +60,20 @@ def check_if_processed_file(file):
     with open(processed_files, 'r') as log_file:
         result = log_file.read().splitlines()
     return file in result
+
+def data_quality_check(df):
+    parquet_data = spark.read.parquet("processed/")
+    if df.count() == parquet_data.count():
+        logger.info(f"Data quality check passed - {df.count()} rows")
+    else:
+        logger.info(f"Data quality check unpassed - Dataframe={df.count()} rows, Parquet={parquet_data.count()} rows")
+
+    null_values = parquet_data.filter(parquet_data['price'].isNull() | parquet_data['minimum_nights'].isNull() | parquet_data['availability_365'].isNull()).count()
+    if null_values == 0:
+        logger.info("There are NO null values in critical columns")
+    else:
+        logger.error(f"There ARE NULL values in critical columns - {null_values}")
+
 
 def read_stream_data():
     try:
@@ -74,11 +87,15 @@ def read_stream_data():
 
 
 def process_stream_data(df):
-    transformed_df = data_transformation(df)
-    save_data(transformed_df)
-    # sql_queries(transformed_df)
     file_name = df.select(input_file_name()).first()[0]
-    log_processed_file(file_name)
+    if check_if_processed_file(file_name):
+        logger.info(f"File {file_name} already processed")
+    else:
+        transformed_df = data_transformation(df)
+        save_data(transformed_df)
+        data_quality_check(transformed_df)
+        # sql_queries(transformed_df)
+        log_processed_file(file_name)
 
 
 raw_stream = read_stream_data()
